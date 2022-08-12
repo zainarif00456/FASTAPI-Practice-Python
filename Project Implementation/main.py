@@ -18,8 +18,8 @@ def signup(model: models.SignUp):
         return {"Admin": "Account Successfully Created"}
         pass
     else:
-        print("Error Occured")
-        raise HTTPException(status_code=status.WS_1011_INTERNAL_ERROR, detail={"Details": "ERROR OCCURED"})
+        print("Error Occurred")
+        raise HTTPException(status_code=status.WS_1011_INTERNAL_ERROR, detail={"Details": "ERROR OCCURRED"})
 
 
 @app.post("/login")
@@ -30,10 +30,26 @@ def login(model: models.Login):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     else:
        if pass_context.verify(model.Password, user.UserPassword):
-           data = {"UserName": user.UserName,
+           data = {"ID": user.ID,
+                    "UserName": user.UserName,
                    "UserPassword": user.UserPassword}
            access_token = authentication.createAccessToken(data)
-           return {"access_token": access_token, "type": "Bearer"}
+           return {"access_token": f"Bearer {access_token}"}
        else:
            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={"Information": "Authorized User OR Invalid Credentials"})
+
+@app.post("/employees", status_code=status.HTTP_201_CREATED)
+def employees(model: models.Employee, admin: models.AdminModel = Depends(authentication.getCurrentUser)):
+    model.AddedBy = admin.ID
+    db.addEmployee(model)
+    return {"Details": "Employee Added Successfully"}
+
+@app.get("/getemployees", status_code=status.HTTP_200_OK)
+def employees(admin: models.AdminModel = Depends(authentication.getCurrentUser)):
+    data = db.getEmployees()
+    if data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"details": "Data Not Found"})
+    else:
+        return data
+
 

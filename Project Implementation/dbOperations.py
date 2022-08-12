@@ -1,3 +1,5 @@
+import datetime
+
 import pyodbc
 import models
 
@@ -33,6 +35,7 @@ def loginAccount(model: models.Login):
         cursor.execute("select * from AdminPanel where UserName = ?", model.UserName)
         row = cursor.fetchone()
         user = models.SignUp
+        user.ID = row[0]
         user.UserName = row[1]
         user.EmailAddress = row[2]
         user.Gender = row[3]
@@ -46,4 +49,44 @@ def loginAccount(model: models.Login):
         return None
 
 
-#   App Start Point. FASTAPI
+def addEmployee(model: models.Employee):
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO Employee(FullName, "
+                   "CNIC,"
+                   "Gender,"
+                   "EmailAddress,"
+                   "PhoneNo,"
+                   "DateOfBirth,"
+                   "Department,"
+                   "AddedBy,"
+                   "EntryTime) values (?, ?, ?, ?, ?, ?, ?, ?, ?)", model.FullName, model.CNIC, model.Gender, model.EmailAddress,
+                   model.PhoneNo, model.DateOfBirth, model.Department, model.AddedBy, datetime.datetime.utcnow())
+    cursor.commit()
+
+
+def getEmployees():
+    cursor = conn.cursor()
+    cursor.execute("select * from Employee")
+    data = cursor.fetchall()
+    if data is None:
+        return None
+    details = {}
+    result = []
+    for rows in data:
+        details = {
+            "ID": rows[0],
+            "FullName": rows[1],
+            "CNIC": rows[2],
+            "Gender": rows[3],
+            "EmailAddress": rows[4],
+            "PhoneNo": rows[5],
+            "DateOfBirth": rows[6],
+            "Department": rows[7],
+            "AddedBy": rows[8],
+            "EntryTime": rows[9]
+        }
+        result.append(details)
+    return {"EmployeeInformation": result}
+
+
+

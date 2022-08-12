@@ -30,9 +30,10 @@ def createAccessToken(data: dict):
 def verify_accrss_token(token: str, credentials_exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        id: str = payload.get("ID")
         username: str = payload.get("UserName")
-        password: str = payload.get("Password")
-        token_data = models.TokenData(UserName=username, Password=password)
+        password: str = payload.get("UserPassword")
+        token_data = models.TokenData(ID=id, UserName=username, Password=password)
     except JWTError as e:
         raise credentials_exception
     return token_data
@@ -41,4 +42,6 @@ def verify_accrss_token(token: str, credentials_exception):
 def getCurrentUser(token: str = Depends(oth2scheme)):
     cred = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could Not Validate Credentials",
                          headers={"WWW-Authenticate": "Bearer"})
-    return verify_accrss_token(token, cred)
+    data = verify_accrss_token(token, cred)
+    return data
+
