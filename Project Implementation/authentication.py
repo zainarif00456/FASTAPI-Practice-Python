@@ -27,7 +27,7 @@ def createAccessToken(data: dict):
     return encoded_jwt
 
 
-def verify_accrss_token(token: str, credentials_exception):
+def verify_access_token(token: str, credentials_exception):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         id: str = payload.get("ID")
@@ -42,6 +42,6 @@ def verify_accrss_token(token: str, credentials_exception):
 def getCurrentUser(token: str = Depends(oth2scheme)):
     cred = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could Not Validate Credentials",
                          headers={"WWW-Authenticate": "Bearer"})
-    data = verify_accrss_token(token, cred)
+    data = verify_access_token(token, cred)
     return data
 
